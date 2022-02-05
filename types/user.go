@@ -1,6 +1,6 @@
 package types
 
-type user struct {
+type User struct {
 	email        string
 	username     string
 	passwordhash string
@@ -8,7 +8,7 @@ type user struct {
 	role         int
 }
 
-func (u *user) ValidatePasswordHash(passHash string) bool {
+func (u *User) ValidatePasswordHash(passHash string) bool {
 	return u.passwordhash == passHash
 
 }

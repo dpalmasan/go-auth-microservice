@@ -5,7 +5,7 @@ import (
 )
 
 func TestValidatePasswordHash(t *testing.T) {
-	user := user{
+	user := User{
 		email:        "test-user@gotest.cl",
 		username:     "user1",
 		passwordhash: "11123451",
