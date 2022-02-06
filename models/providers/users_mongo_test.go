@@ -48,5 +48,11 @@ func TestAdd(t *testing.T) {
 		t.Fatalf(`Expected user count should be 1`)
 	}
 
+	_, err = db.Add(user)
+
+	if err == nil {
+		t.Fatalf(`User with existing email should not be inserted`)
+	}
+
 	tearDown()
 }
