@@ -1,14 +1,17 @@
 package types
 
+import "time"
+
 type User struct {
-	email        string
-	username     string
-	passwordhash string
-	createDate   string
-	role         int
+	Id           string    `json:"id" bson:"_id,omitempty"`
+	Email        string    `json:"email" bson:"email,omitempty"`
+	Username     string    `json:"username" bson:"username"`
+	Passwordhash string    `json:"password" bson:"password,omitempty"`
+	CreatedAt    time.Time `json:"created_at" bson:"created_at,omitempty"`
+	Role         int       `json:"role" bson:"role,omitempty"`
 }
 
 func (u *User) ValidatePasswordHash(passHash string) bool {
-	return u.passwordhash == passHash
+	return u.Passwordhash == passHash
 
 }

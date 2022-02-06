@@ -2,15 +2,16 @@ package types
 
 import (
 	"testing"
+	"time"
 )
 
 func TestValidatePasswordHash(t *testing.T) {
 	user := User{
-		email:        "test-user@gotest.cl",
-		username:     "user1",
-		passwordhash: "11123451",
-		createDate:   "100000000",
-		role:         0,
+		Email:        "test-user@gotest.cl",
+		Username:     "user1",
+		Passwordhash: "11123451",
+		CreatedAt:    time.Date(2020, 11, 14, 11, 30, 32, 0, time.UTC),
+		Role:         0,
 	}
 
 	if !user.ValidatePasswordHash("11123451") {
