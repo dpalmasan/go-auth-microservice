@@ -19,7 +19,7 @@ const (
 type MongoDBUser struct{}
 
 func (m MongoDBUser) GetByEmail(email string) (types.User, error) {
-	user := types.User{}
+	var user types.User
 	var result bson.M
 	coll := mongodb.Session.Database("auth-db").Collection(CollectionUser)
 	err := coll.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&result)
@@ -30,7 +30,7 @@ func (m MongoDBUser) GetByEmail(email string) (types.User, error) {
 	if err != nil {
 		panic(err)
 	}
-	bsonBytes, _ := bson.Marshal(m)
+	bsonBytes, _ := bson.Marshal(result)
 	bson.Unmarshal(bsonBytes, &user)
 	return user, nil
 }

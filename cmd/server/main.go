@@ -31,6 +31,12 @@ func main() {
 
 	db = providers.MongoDBUser{}
 
+	defer func() {
+		if err := mongodb.Session.Disconnect(context.TODO()); err != nil {
+			panic(err)
+		}
+	}()
+
 	user := types.User{
 		Email:        "test-user@gotest.cl",
 		Username:     "user1",
@@ -42,13 +48,16 @@ func main() {
 	_, err := db.Add(user)
 	if err != nil {
 		log.Error(err)
+	} else {
+		log.Info("User inserted successfully!")
+	}
+
+	user, err = db.GetByEmail("test-user@gotest.cl")
+
+	if err != nil {
+		log.Error(err)
 		return
 	}
-	log.Info("User inserted successfully!")
 
-	defer func() {
-		if err = mongodb.Session.Disconnect(context.TODO()); err != nil {
-			panic(err)
-		}
-	}()
+	log.Infof("Retrieved user %+v", user)
 }
