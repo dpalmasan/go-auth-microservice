@@ -21,7 +21,7 @@ type MongoDBUser struct{}
 func (m MongoDBUser) GetByEmail(email string) (types.User, error) {
 	var user types.User
 	var result bson.M
-	coll := mongodb.Session.Database("auth-db").Collection(CollectionUser)
+	coll := mongodb.Session.Database(mongodb.DatabaseName).Collection(CollectionUser)
 	err := coll.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&result)
 	if err == mongo.ErrNoDocuments {
 		return user, err
@@ -36,14 +36,14 @@ func (m MongoDBUser) GetByEmail(email string) (types.User, error) {
 }
 
 func (m MongoDBUser) Add(user types.User) (types.User, error) {
-	coll := mongodb.Session.Database("auth-db").Collection(CollectionUser)
+	coll := mongodb.Session.Database(mongodb.DatabaseName).Collection(CollectionUser)
 	var result bson.M
 	err := coll.FindOne(context.TODO(), bson.D{{"email", user.Email}}).Decode(&result)
 	if err == mongo.ErrNoDocuments {
 		time := time.Now()
 		user.CreatedAt = time
 
-		res, err := mongodb.Session.Database("auth-db").Collection(CollectionUser).InsertOne(nil, user)
+		res, err := mongodb.Session.Database(mongodb.DatabaseName).Collection(CollectionUser).InsertOne(nil, user)
 		if err != nil {
 			return user, err
 		}

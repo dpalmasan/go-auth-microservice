@@ -23,3 +23,5 @@ require (
 )
 
 replace github.com/go-auth-microservice/db/mongodb => ../mongodb
+
+replace github.com/go-auth-microservice/models/providers => ../../models/providers

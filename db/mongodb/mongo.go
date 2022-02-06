@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	log     = logrus.New()
-	Session *mongo.Client
+	log          = logrus.New()
+	Session      *mongo.Client
+	DatabaseName string
 )
 
 func init() {
@@ -19,9 +20,10 @@ func init() {
 }
 
 func ConnectToMongo() {
+	DatabaseName = os.Getenv("MONGO_DBNAME")
 	MONGO_URI := os.Getenv("MONGO_URI")
 	if len(MONGO_URI) == 0 {
-		MONGO_URI = "mongodb://localhost/auth-db"
+		MONGO_URI = "mongodb://localhost/"
 	}
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(MONGO_URI))
