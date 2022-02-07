@@ -2,6 +2,7 @@ package models
 
 import (
 	"crypto/rsa"
+	"fmt"
 	"io/ioutil"
 	"time"
 
@@ -67,4 +68,21 @@ func NewRefreshToken(timeDuration time.Duration) (string, error) {
 	refreshToken, _ := uuid.NewUUID()
 
 	return refreshToken.String(), nil
+}
+
+func VerifyToken(tokenString string) (*jwt.Token, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return verifyKey, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return token, err
 }
