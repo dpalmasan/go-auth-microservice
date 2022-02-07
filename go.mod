@@ -3,6 +3,9 @@ module github.com/go-auth-microservice
 go 1.17
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-chi/chi v1.5.4
+	github.com/google/uuid v1.3.0
 	github.com/sirupsen/logrus v1.8.1
 	go.mongodb.org/mongo-driver v1.8.3
 )
@@ -25,3 +28,5 @@ require (
 replace github.com/go-auth-microservice/db/mongodb => ../mongodb
 
 replace github.com/go-auth-microservice/models/providers => ../../models/providers
+
+replace github.com/go-auth-microservice/api/session => ../api/session

@@ -2,12 +2,11 @@ package main
 
 import (
 	"context"
-	"time"
+	"net/http"
 
+	"github.com/go-auth-microservice/api/session"
 	"github.com/go-auth-microservice/db/mongodb"
-	"github.com/go-auth-microservice/models"
 	"github.com/go-auth-microservice/models/providers"
-	"github.com/go-auth-microservice/types"
 	"github.com/sirupsen/logrus"
 )
 
@@ -27,9 +26,8 @@ func init() {
 }
 
 func main() {
-	var db models.UserModel
-
-	db = providers.MongoDBUser{}
+	PORT := "4000"
+	db := providers.MongoDBUser{}
 
 	defer func() {
 		if err := mongodb.Session.Disconnect(context.TODO()); err != nil {
@@ -37,27 +35,8 @@ func main() {
 		}
 	}()
 
-	user := types.User{
-		Email:        "test-user@gotest.cl",
-		Username:     "user1",
-		Passwordhash: "11123451",
-		CreatedAt:    time.Date(2020, 11, 14, 11, 30, 32, 0, time.UTC),
-		Role:         0,
-	}
+	router := session.Routes(db)
 
-	_, err := db.Add(user)
-	if err != nil {
-		log.Error(err)
-	} else {
-		log.Info("User inserted successfully!")
-	}
-
-	user, err = db.GetByEmail("test-user@gotest.cl")
-
-	if err != nil {
-		log.Error(err)
-		return
-	}
-
-	log.Infof("Retrieved user %+v", user)
+	log.Infof("Running service on port %s", PORT)
+	http.ListenAndServe(":"+PORT, router)
 }
