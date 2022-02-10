@@ -21,6 +21,11 @@ func init() {
 
 func ConnectToMongo() {
 	DatabaseName = os.Getenv("MONGO_DBNAME")
+
+	if len(DatabaseName) == 0 {
+		DatabaseName = "auth"
+	}
+
 	MONGO_URI := os.Getenv("MONGO_URI")
 	if len(MONGO_URI) == 0 {
 		MONGO_URI = "mongodb://localhost/"
