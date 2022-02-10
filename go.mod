@@ -6,6 +6,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi v1.5.4
 	github.com/google/uuid v1.3.0
+	github.com/opentracing/opentracing-go v1.2.0
 	github.com/sirupsen/logrus v1.8.1
 	go.mongodb.org/mongo-driver v1.8.3
 	google.golang.org/grpc v1.44.0

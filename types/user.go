@@ -10,8 +10,3 @@ type User struct {
 	CreatedAt    time.Time `json:"created_at" bson:"created_at,omitempty"`
 	Role         int       `json:"role" bson:"role,omitempty"`
 }
-
-func (u *User) ValidatePasswordHash(passHash string) bool {
-	return u.Passwordhash == passHash
-
-}

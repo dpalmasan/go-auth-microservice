@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-auth-microservice/db/mongodb"
 	"github.com/go-auth-microservice/types"
+	"github.com/go-auth-microservice/utils/crypto"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -42,6 +43,13 @@ func (m MongoDBUser) Add(user types.User) (types.User, error) {
 	if err == mongo.ErrNoDocuments {
 		time := time.Now()
 		user.CreatedAt = time
+		hashedPassword, err := crypto.HashPassword(user.Passwordhash)
+
+		if err != nil {
+			return user, err
+		}
+
+		user.Passwordhash = hashedPassword
 
 		res, err := mongodb.Session.Database(mongodb.DatabaseName).Collection(CollectionUser).InsertOne(nil, user)
 		if err != nil {

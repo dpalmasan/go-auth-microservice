@@ -1,4 +1,4 @@
-package session
+package user
 
 import (
 	"encoding/json"
@@ -7,9 +7,9 @@ import (
 
 	"github.com/go-auth-microservice/models"
 	"github.com/go-auth-microservice/types"
-	"github.com/go-auth-microservice/utils/crypto"
 	"github.com/go-chi/chi"
 	chiMiddleware "github.com/go-chi/chi/middleware"
+	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 )
 
@@ -25,52 +25,47 @@ func Routes(userModel models.UserModel) chi.Router {
 	router.Use(chiMiddleware.AllowContentType("application/json"))
 
 	router.Post("/", func(w http.ResponseWriter, r *http.Request) {
-		Login(userModel, w, r)
+		Create(userModel, w, r)
 	})
 
 	return router
 }
 
-func Login(userModel models.UserModel, w http.ResponseWriter, r *http.Request) {
+func Create(userModel models.UserModel, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
+	parent := opentracing.GlobalTracer().StartSpan("POST /users")
+
+	defer parent.Finish()
+
 	b, err := ioutil.ReadAll(r.Body)
+
 	defer r.Body.Close()
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	var user *types.User
+	var user types.User
 	err = json.Unmarshal(b, &user)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	dbUser, err := userModel.GetByEmail(user.Email)
+	user, err = userModel.Add(user)
+
 	if err != nil {
-		log.Error("email not registered in our records")
+		log.Error(err)
 		return
 	}
 
-	validPassword := crypto.CheckPasswordHash(user.Passwordhash, dbUser.Passwordhash)
-	if !validPassword {
-		log.Error("Incorrect password for the provided email")
-		return
-	}
-
-	tokenString, refreshToken, err := CreateJWTToken()
+	output, err := json.Marshal(user)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 		return
 	}
 
-	w.Header().Set("Authorization", tokenString)
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(`{
-		"tokens": {
-			"access": "` + tokenString + `",
-			"refresh": "` + refreshToken + `"
-		}
-	}`))
+	w.Write(output)
 }

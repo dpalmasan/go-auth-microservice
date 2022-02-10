@@ -5,8 +5,10 @@ import (
 	"net/http"
 
 	"github.com/go-auth-microservice/api/session"
+	"github.com/go-auth-microservice/api/user"
 	"github.com/go-auth-microservice/db/mongodb"
 	"github.com/go-auth-microservice/models/providers"
+	"github.com/go-chi/chi"
 	"github.com/sirupsen/logrus"
 )
 
@@ -35,7 +37,10 @@ func main() {
 		}
 	}()
 
-	router := session.Routes(db)
+	router := chi.NewRouter()
+
+	router.Mount("/login", session.Routes(db))
+	router.Mount("/users", user.Routes(db))
 
 	log.Infof("Running service on port %s", PORT)
 	http.ListenAndServe(":"+PORT, router)
