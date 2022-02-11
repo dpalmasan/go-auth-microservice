@@ -51,6 +51,9 @@ func (m MongoDBUser) Add(user types.User) (types.User, error) {
 
 		user.Passwordhash = hashedPassword
 
+		// We always want users registered to be non admin
+		user.Role = types.Regular
+
 		res, err := mongodb.Session.Database(mongodb.DatabaseName).Collection(CollectionUser).InsertOne(nil, user)
 		if err != nil {
 			return user, err
