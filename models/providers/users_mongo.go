@@ -38,8 +38,13 @@ func (m MongoDBUser) GetByEmail(email string) (types.User, error) {
 
 func (m MongoDBUser) Add(user types.User) (types.User, error) {
 	coll := mongodb.Session.Database(mongodb.DatabaseName).Collection(CollectionUser)
-	var result bson.M
-	err := coll.FindOne(context.TODO(), bson.D{{"email", user.Email}}).Decode(&result)
+	var result types.User
+	err := coll.FindOne(context.TODO(), bson.M{
+		"$or": []bson.M{
+			{"email": user.Email},
+			{"username": user.Username},
+		}}).Decode(&result)
+
 	if err == mongo.ErrNoDocuments {
 		time := time.Now()
 		user.CreatedAt = time
@@ -65,6 +70,9 @@ func (m MongoDBUser) Add(user types.User) (types.User, error) {
 
 	}
 	if err == nil {
+		if result.Username == user.Username {
+			return user, errors.New("Username already exist")
+		}
 		return user, errors.New("Email is already registered")
 	}
 	return user, err
