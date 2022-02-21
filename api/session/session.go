@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/go-auth-microservice/models"
 	"github.com/go-auth-microservice/types"
@@ -65,6 +66,23 @@ func Login(userModel models.UserModel, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// This is based on JWT duration time. Maybe should be added in a config
+	timeTTL := time.Minute * 5
+	timeDuration := time.Now().Add(timeTTL)
+	cookie := http.Cookie{
+		Name:     "access_token",
+		Value:    tokenString,
+		HttpOnly: true,
+		Expires:  timeDuration,
+	}
+
+	http.SetCookie(w, &cookie)
+	refreshTokenCookie := http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		HttpOnly: true,
+	}
+	http.SetCookie(w, &refreshTokenCookie)
 	w.Header().Set("Authorization", tokenString)
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(`{

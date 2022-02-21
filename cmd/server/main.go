@@ -39,7 +39,7 @@ func main() {
 
 	router := chi.NewRouter()
 
-	router.Mount("/login", session.Routes(db))
+	router.Mount("/jwt", session.Routes(db))
 	router.Mount("/users", user.Routes(db))
 
 	log.Infof("Running service on port %s", PORT)
