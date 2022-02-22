@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-auth-microservice/db/redis"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
@@ -68,6 +69,10 @@ func NewAccessToken(timeDuration int64) (string, error) {
 func NewRefreshToken(timeDuration time.Duration) (string, error) {
 	refreshToken, _ := uuid.NewUUID()
 
+	err := redis.Redis.Set(refreshToken.String(), "true", timeDuration).Err()
+	if err != nil {
+		return "", err
+	}
 	return refreshToken.String(), nil
 }
 

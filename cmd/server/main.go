@@ -7,6 +7,7 @@ import (
 	"github.com/go-auth-microservice/api/session"
 	"github.com/go-auth-microservice/api/user"
 	"github.com/go-auth-microservice/db/mongodb"
+	"github.com/go-auth-microservice/db/redis"
 	"github.com/go-auth-microservice/models/providers"
 	"github.com/go-chi/chi"
 	"github.com/sirupsen/logrus"
@@ -25,6 +26,7 @@ func init() {
 
 	// Connect to DB
 	mongodb.ConnectToMongo()
+	redis.ConnectToRedis()
 }
 
 func main() {
