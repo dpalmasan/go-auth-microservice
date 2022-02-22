@@ -23,12 +23,12 @@ type server struct {
 func (s *server) ValidateToken(ctx context.Context, in *pb.TokenRequest) (*pb.TokenResponse, error) {
 	tokenString := in.GetToken()
 
-	_, err := models.VerifyToken(tokenString)
+	token, err := models.VerifyToken(tokenString)
 	if err != nil {
 		return &pb.TokenResponse{Success: false}, err
 	}
 
-	return &pb.TokenResponse{Success: true}, nil
+	return &pb.TokenResponse{Success: token.Valid}, nil
 }
 
 func main() {
