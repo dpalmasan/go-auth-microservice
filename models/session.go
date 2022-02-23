@@ -9,6 +9,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-auth-microservice/db/redis"
+	"github.com/go-auth-microservice/types"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
@@ -53,11 +54,14 @@ func init() {
 	}
 }
 
-func NewAccessToken(timeDuration int64) (string, error) {
+func NewAccessToken(user types.User, timeDuration int64) (string, error) {
 	token := jwt.New(jwt.SigningMethodRS256)
 	claims := make(jwt.MapClaims)
 	claims["exp"] = timeDuration
 	claims["iat"] = time.Now().Unix()
+	claims["role"] = user.Role.String()
+	token.Claims = claims
+	token.Header["kid"] = "4abaccf5-1b16-4ecf-aa98-c75091ffab5c"
 	tokenString, err := token.SignedString(signKey)
 	if err != nil {
 		return "", err

@@ -60,7 +60,7 @@ func Login(userModel models.UserModel, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenString, refreshToken, err := CreateJWTToken()
+	tokenString, refreshToken, err := CreateJWTToken(dbUser)
 	if err != nil {
 		log.Fatal(err)
 		return
