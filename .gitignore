@@ -21,3 +21,5 @@ secrets
 
 *.pem
 *.pub
+*.csr
+*.crt
