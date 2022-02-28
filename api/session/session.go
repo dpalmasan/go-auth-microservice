@@ -1,11 +1,13 @@
 package session
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"time"
 
+	"github.com/go-auth-microservice/api/user"
 	"github.com/go-auth-microservice/models"
 	"github.com/go-auth-microservice/types"
 	"github.com/go-auth-microservice/utils/crypto"
@@ -25,8 +27,12 @@ func Routes(userModel models.UserModel) chi.Router {
 
 	router.Use(chiMiddleware.AllowContentType("application/json"))
 
-	router.Post("/", func(w http.ResponseWriter, r *http.Request) {
+	router.Post("/jwt", func(w http.ResponseWriter, r *http.Request) {
 		Login(userModel, w, r)
+	})
+
+	router.Post("/register", func(w http.ResponseWriter, r *http.Request) {
+		Registration(userModel, w, r)
 	})
 
 	return router
@@ -91,4 +97,18 @@ func Login(userModel models.UserModel, w http.ResponseWriter, r *http.Request) {
 			"refresh": "` + refreshToken + `"
 		}
 	}`))
+}
+
+func Registration(userModel models.UserModel, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	b, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+	user.Create(userModel, w, r)
 }

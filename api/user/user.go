@@ -53,6 +53,9 @@ func Create(userModel models.UserModel, w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// TODO: Implement a role to be passed so we overwrite this
+	// By default all users should be regular!
+	user.Role = types.Regular
 	user, err = userModel.Add(user)
 
 	if err != nil {
