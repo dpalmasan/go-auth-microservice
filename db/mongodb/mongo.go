@@ -2,8 +2,8 @@ package mongodb
 
 import (
 	"context"
-	"os"
 
+	"github.com/go-auth-microservice/utils"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -20,16 +20,8 @@ func init() {
 }
 
 func ConnectToMongo() {
-	DatabaseName = os.Getenv("MONGO_DBNAME")
-
-	if len(DatabaseName) == 0 {
-		DatabaseName = "auth"
-	}
-
-	MONGO_URI := os.Getenv("MONGO_URI")
-	if len(MONGO_URI) == 0 {
-		MONGO_URI = "mongodb://localhost/"
-	}
+	DatabaseName = utils.Getenv("MONGO_DBNAME", "auth")
+	MONGO_URI := utils.Getenv("MONGO_URI", "mongodb://localhost/auth")
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(MONGO_URI))
 	if err != nil {
