@@ -9,6 +9,7 @@ import (
 	"github.com/go-auth-microservice/db/mongodb"
 	"github.com/go-auth-microservice/db/redis"
 	"github.com/go-auth-microservice/models/providers"
+	"github.com/go-auth-microservice/utils"
 	"github.com/go-chi/chi"
 	"github.com/sirupsen/logrus"
 )
@@ -30,7 +31,7 @@ func init() {
 }
 
 func main() {
-	PORT := "4000"
+	PORT := utils.Getenv("AUTH_SERVER_PORT", "4000")
 	db := providers.MongoDBUser{}
 
 	defer func() {
