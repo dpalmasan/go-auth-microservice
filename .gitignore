@@ -23,3 +23,5 @@ secrets
 *.pub
 *.csr
 *.crt
+
+.python-version

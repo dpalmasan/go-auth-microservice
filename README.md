@@ -27,11 +27,18 @@ Here is a [good starting point](https://www.baeldung.com/openssl-self-signed-cer
 We can also run the following command to get info about key (prime factor 1, prime factor 2, modulos, quotient, etc; Which MAY be used for JWKs processing):
 
 ```
-openssl rsa \
-    -noout -text \
-    -inform PEM \
-    -in cert/private_key.pem
+openssl rsa -pubin \
+    -in cert/public_key.pub \
+    -text -noout 
 ```
+
+I have also implemented a script utility that will help you get the modulo (Assuming the exponent is `65537`):
+
+```
+scripts/jwk_modulus_base64url --infile ./cert/public_key.pub
+```
+
+Then you can use the output in your `JWK` public key modulo property (`n`). Note that padding was removed in the output string.
 
 ### Certificate signing request
 
@@ -49,8 +56,8 @@ This certificate is the one to be used in JWKs certificates chain (e.g. `x5c` at
 openssl x509 \
     -signkey cert/private_key.pem \
     -in cert/auth_service.csr \
-    -req -days 365 
-    \-out cert/auth_service.crt
+    -req -days 365 \
+    -out cert/auth_service.crt
 ```
 
 To view the certificate:
@@ -58,5 +65,5 @@ To view the certificate:
 ```
 openssl x509 \
     -text -noout \
-    -in domain.crt
+    -in cert/auth_service.crt
 ```
