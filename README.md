@@ -15,7 +15,7 @@ openssl rsa \
     -pubout > cert/public_key.pub
 ```
 
-## To use JWK
+## Using JWK
 
 Here is a [good starting point](https://www.baeldung.com/openssl-self-signed-cert) to understand what is next. On the other hand, it is a good idea checking RFC standards:
 
@@ -66,4 +66,28 @@ To view the certificate:
 openssl x509 \
     -text -noout \
     -in cert/auth_service.crt
+```
+
+## Running with Docker
+
+You can build a docker image:
+
+```
+docker build -t auth-service .
+```
+
+Assuming you have a mongo server and a redis server in your local, you can do:
+
+```
+docker run -e MONGO_URI="mongodb://host.docker.internal/auth" -e REDIS_URL="redis://host.docker.internal:6379/1" -p 4000:4000 auth-service
+```
+
+The service will be listening on port 4000 in this case.
+
+## Running with docker-compose
+
+You can also run the service without having to install and set mongo and redis. For development purposes, to execute the service you can run:
+
+```
+docker-compose up --build
 ```
