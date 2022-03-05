@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/go-auth-microservice/api/health"
 	"github.com/go-auth-microservice/api/session"
 	"github.com/go-auth-microservice/api/user"
 	"github.com/go-auth-microservice/db/mongodb"
@@ -44,6 +45,7 @@ func main() {
 
 	router.Mount("/session", session.Routes(db))
 	router.Mount("/users", user.Routes(db))
+	router.Mount("/", health.Routes())
 	log.Infof("Running service on port %s", PORT)
 	http.ListenAndServe(":"+PORT, router)
 }
