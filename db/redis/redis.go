@@ -32,6 +32,7 @@ func ConnectToRedis() {
 	_, err = Redis.Ping().Result()
 	if err != nil {
 		log.Panicf("Cannot connect to REDIS_URL=%s", REDIS_URL)
+		log.Panic(err)
 		panic(err)
 	}
 
