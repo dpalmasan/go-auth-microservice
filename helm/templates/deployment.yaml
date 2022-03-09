@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "authService.fullname" . }}
+  labels:
+    app: {{ template "authService.name" . }}
+    chart: {{ template "authService.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.server.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        release: {{ .Release.Name }}
+      annotations:
+{{ toYaml .Values.server.podAnnotations | indent 8 }}
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+        - name: {{ template "authService.fullname" . }}
+          image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"
+          imagePullPolicy: {{ .Values.server.image.imagePullPolicy }}
+          # enableServiceLinks: false
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          env:
+            - name: PORT
+              value: "{{ .Values.server.env.PORT }}"
+            - name: MONGO_URI
+              value: "{{ .Values.server.env.MONGO_URI }}"
+            - name: REDIS_URL
+              value: "{{ .Values.server.env.REDIS_URL }}"
+          #livenessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: {{ .Values.service.internalPort }}
+          #readinessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: {{ .Values.service.internalPort }}
+          resources:
+{{ toYaml .Values.server.resources | indent 12 }}
+          volumeMounts:
+            - name: private-key
+              mountPath: /app/cert/private_key.pem
+              subPath: private_key.pem
+              readOnly: true
+            - name: public-key
+              mountPath: /app/cert/public_key.pub
+              subPath: public_key.pub
+              readOnly: true
+      volumes:
+        - name: private-key
+          secret:
+            secretName: auth-svc-private-key
+            defaultMode: 0400
+        - name: public-key
+          secret:
+            secretName: auth-svc-public-key
+            defaultMode: 0400
+          # configMap:
+          #  name: {{ template "authService.fullname" . }}
+    {{- if .Values.server.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.server.nodeSelector | indent 8 }}
+    {{- end }}

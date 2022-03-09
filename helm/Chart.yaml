@@ -1,0 +1,22 @@
+apiVersion: v1
+description: Authentication micro-service
+name: auth-service
+version: 0.1.0
+keywords:
+- auth
+- microservice
+- go
+home: https://github.com/dpalmasan/go-auth-microservice
+sources:
+- https://github.com/dpalmasan/go-auth-microservice
+maintainers:
+- name: Diego Palma
+  url: https://github.com/dpalmasan
+engine: gotpl
+dependencies:
+- name: mongodb
+  version: 8.2.1
+  repository: https://charts.bitnami.com/bitnami
+- name: redis
+  version: 10.5.7
+  repository: https://charts.bitnami.com/bitnami

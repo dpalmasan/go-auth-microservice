@@ -91,3 +91,25 @@ You can also run the service without having to install and set mongo and redis. 
 ```
 docker-compose up --build
 ```
+
+## Running on minikube
+
+```
+# Install dependencies (charts)
+cd helm && helm dependency build && cd -
+
+# Run application
+helm \                                                            
+    --kube-context=minikube \
+    --create-namespace \
+    --namespace=auth-svc \
+    upgrade --install --force --recreate-pods\
+    auth-svc \
+    helm
+```
+
+I also added `dnsutils.yaml` for debugging purposes, as I was stuck with some developments (`redis` endpoint as an example and other DNS mappings). As an example, this command was useful:
+
+```
+kubectl exec -i -t dnsutils -n auth-svc -- nslookup 10.108.136.235
+```

@@ -1,0 +1,117 @@
+## Add additional labels to all resources
+##
+extraLabels:
+
+# Default values for go-auth.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+server:
+  replicaCount: 1
+  # annotations:
+  #   metrics: true
+  terminationGracePeriodSeconds: 30
+  podAnnotations: {}
+  image:
+    repository: dpalmasan/auth-service
+    tag: latest
+    ## Global imagePullPolicy
+    ## Default: 'Always' if image tag is 'latest', else 'IfNotPresent'
+    ## Ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    imagePullPolicy: Always
+  env:
+    PORT: 4000
+    MONGO_URI: "mongodb://auth-svc-mongodb:27017/auth"
+    REDIS_URL: "redis://auth-svc-redis-master.auth-svc.svc.cluster.local:6379"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+  nodeSelector: {}
+
+metrics:
+  enabled: false
+
+## Service Account
+## Ref: https://kubernetes.io/docs/admin/service-accounts-admin/
+##
+serviceAccount:
+  create: true
+
+  ## The name of the ServiceAccount to use.
+  ## If not set and create is true, a name is generated using the fullname template
+  name: auth-service
+
+networkPolicy:
+  ## Specifies whether a NetworkPolicy should be created
+  ##
+  enabled: true
+  apiVersion: networking.k8s.io/v1
+
+  ## The Policy model to apply. When set to false, only pods with the correct
+  ## client label will have network access to the port Redis is listening
+  ## on. When true, Redis will accept connections from any source
+  ## (with the correct destination port).
+  ##
+  # allowExternal: true
+
+service:
+  name: auth
+  type: ClusterIP
+  externalPort: 4000
+  internalPort: 4000
+  ## nodePort port number
+  ## Is not required, but allows for static port assignment with
+  ## serviceType NodePort.
+  ## Default: nil
+  # nodePort: 30000
+
+ingress:
+  enabled: false
+  hosts:
+  - auth.example.com
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+  ## Ingress TLS configuration
+  ## Secrets must be manually created in the namespace
+  tls:
+    # Secrets must be manually created in the namespace.
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local
+
+serverConfigFile:
+  private_key.pem: ""
+  public_key.pub: ""
+
+
+mongodb:
+  # We don't complicate with authentication in MongoDB
+  # Update for prod environments!
+  auth:
+    enabled: false
+  persistence:
+    enabled: false
+    # storageClass:
+    # accessMode: ReadWriteOnce
+    # size: 8Gi
+
+redis:
+  networkPolicy:
+    enabled: true
+
+  usePassword: false
+
+  serviceAccount:
+    ## Specifies whether a ServiceAccount should be created
+    ##
+    create: true
+    ## The name of the ServiceAccount to use.
+    ## If not set and create is true, a name is generated using the fullname template
+    name: auth-service
+
+  rbac:
+    create: true

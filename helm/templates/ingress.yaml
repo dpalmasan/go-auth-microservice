@@ -1,0 +1,30 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: apps/v1
+kind: Ingress
+metadata:
+  name: {{ template "authService.fullname" . }}
+  labels:
+    app: {{ template "authService.name" . }}
+    chart: {{ template "authService.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  rules:
+    {{- range $host := .Values.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: /
+            backend:
+              servicename: {{ template "authService.fullname" . }}
+              servicePort: {{ .Values.service.internalPort }}
+    {{- end -}}
+  {{- if .Values.ingress.tls }}
+  tls:
+{{ toYaml .Values.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}
