@@ -99,11 +99,11 @@ docker-compose up --build
 cd helm && helm dependency build && cd -
 
 # Run application
-helm \                                                            
+helm \
     --kube-context=minikube \
     --create-namespace \
     --namespace=auth-svc \
-    upgrade --install --force --recreate-pods\
+    upgrade --install --force --recreate-pods \
     auth-svc \
     helm
 ```
