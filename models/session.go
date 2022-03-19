@@ -96,3 +96,17 @@ func VerifyToken(tokenString string) (*jwt.Token, error) {
 
 	return token, err
 }
+
+func CheckRefreshToken(token string) (bool, error) {
+	value := redis.Redis.Get(token)
+	if value.Err() != nil {
+		return false, value.Err()
+	}
+
+	status, err := value.Result()
+	if err != nil && status != "true" {
+		return false, err
+	}
+
+	return true, nil
+}

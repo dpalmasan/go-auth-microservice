@@ -35,6 +35,10 @@ func Routes(userModel models.UserModel) chi.Router {
 		Registration(userModel, w, r)
 	})
 
+	router.Post("/refresh", func(w http.ResponseWriter, r *http.Request) {
+		Refresh(userModel, w, r)
+	})
+
 	return router
 }
 
@@ -89,6 +93,14 @@ func Login(userModel models.UserModel, w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	}
 	http.SetCookie(w, &refreshTokenCookie)
+
+	userIdCookie := http.Cookie{
+		Name:     "user_id",
+		Value:    dbUser.Id,
+		HttpOnly: true,
+	}
+
+	http.SetCookie(w, &userIdCookie)
 	w.Header().Set("Authorization", tokenString)
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(`{
@@ -111,4 +123,84 @@ func Registration(userModel models.UserModel, w http.ResponseWriter, r *http.Req
 	}
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(b))
 	user.Create(userModel, w, r)
+}
+
+func Refresh(userModel models.UserModel, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	refreshTokenCookie, err := r.Cookie("refresh_token")
+
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		log.Error("Not authorized")
+		return
+	}
+
+	refreshToken := refreshTokenCookie.Value
+
+	if refreshToken == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		log.Error("Not authorized")
+		return
+	}
+
+	status, err := models.CheckRefreshToken(refreshToken)
+	if err != nil || status != true {
+		w.WriteHeader(http.StatusUnauthorized)
+		log.Error(err)
+		return
+	}
+
+	userIdCookie, err := r.Cookie("user_id")
+
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		log.Error("Error while reading cookie!")
+		return
+	}
+
+	userId := userIdCookie.Value
+
+	if userId == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		log.Error("Invalid user!")
+		return
+	}
+
+	dbUser, err := userModel.GetById(userId)
+	if err != nil {
+		log.Errorf("User %s not found (%s)", userId, err)
+		return
+	}
+
+	tokenString, refreshToken, err := CreateJWTToken(dbUser)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	timeTTL := time.Minute * 5
+	timeDuration := time.Now().Add(timeTTL)
+	cookie := http.Cookie{
+		Name:     "access_token",
+		Value:    tokenString,
+		HttpOnly: true,
+		Expires:  timeDuration,
+	}
+
+	http.SetCookie(w, &cookie)
+	newRefreshTokenCookie := http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		HttpOnly: true,
+	}
+	http.SetCookie(w, &newRefreshTokenCookie)
+
+	w.Header().Set("Authorization", tokenString)
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(`{
+		"tokens": {
+			"access": "` + tokenString + `",
+			"refresh": "` + refreshToken + `"
+		}
+	}`))
 }

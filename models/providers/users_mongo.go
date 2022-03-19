@@ -77,3 +77,26 @@ func (m MongoDBUser) Add(user types.User) (types.User, error) {
 	}
 	return user, err
 }
+
+func (m MongoDBUser) GetById(id string) (types.User, error) {
+	var user types.User
+	var result bson.M
+
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return user, err
+	}
+
+	coll := mongodb.Session.Database(mongodb.DatabaseName).Collection(CollectionUser)
+	err = coll.FindOne(context.TODO(), bson.M{"_id": objectId}).Decode(&result)
+	if err == mongo.ErrNoDocuments {
+		return user, err
+	}
+
+	if err != nil {
+		panic(err)
+	}
+	bsonBytes, _ := bson.Marshal(result)
+	bson.Unmarshal(bsonBytes, &user)
+	return user, nil
+}
