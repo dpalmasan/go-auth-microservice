@@ -60,6 +60,7 @@ func NewAccessToken(user types.User, timeDuration int64) (string, error) {
 	claims["exp"] = timeDuration
 	claims["iat"] = time.Now().Unix()
 	claims["role"] = user.Role.String()
+	claims["user_id"] = user.Id
 	token.Claims = claims
 	token.Header["kid"] = "4abaccf5-1b16-4ecf-aa98-c75091ffab5c"
 	tokenString, err := token.SignedString(signKey)

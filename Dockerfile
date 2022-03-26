@@ -1,6 +1,6 @@
 FROM golang:alpine as builder
 
-RUN apk --update add --no-cache ca-certificates
+RUN apk --update add --no-cache ca-certificates git
 RUN update-ca-certificates
 
 # Build project
