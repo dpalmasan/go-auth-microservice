@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"time"
 
 	"github.com/go-auth-microservice/api/user"
 	"github.com/go-auth-microservice/models"
@@ -14,6 +13,7 @@ import (
 	"github.com/go-chi/chi"
 	chiMiddleware "github.com/go-chi/chi/middleware"
 	"github.com/sirupsen/logrus"
+	"github.com/dgrijalva/jwt-go"
 )
 
 var log = logrus.New()
@@ -76,17 +76,6 @@ func Login(userModel models.UserModel, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// This is based on JWT duration time. Maybe should be added in a config
-	timeTTL := time.Minute * 5
-	timeDuration := time.Now().Add(timeTTL)
-	cookie := http.Cookie{
-		Name:     "access_token",
-		Value:    tokenString,
-		HttpOnly: true,
-		Expires:  timeDuration,
-	}
-
-	http.SetCookie(w, &cookie)
 	refreshTokenCookie := http.Cookie{
 		Name:     "refresh_token",
 		Value:    refreshToken,
@@ -94,14 +83,6 @@ func Login(userModel models.UserModel, w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &refreshTokenCookie)
 
-	userIdCookie := http.Cookie{
-		Name:     "user_id",
-		Value:    dbUser.Id,
-		HttpOnly: true,
-	}
-
-	http.SetCookie(w, &userIdCookie)
-	w.Header().Set("Authorization", tokenString)
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(`{
 		"tokens": {
@@ -143,28 +124,15 @@ func Refresh(userModel models.UserModel, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	status, err := models.CheckRefreshToken(refreshToken)
-	if err != nil || status != true {
+	jwtToken, err := models.CheckRefreshToken(refreshToken)
+	if err != nil || jwtToken == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		log.Error(err)
 		return
 	}
 
-	userIdCookie, err := r.Cookie("user_id")
-
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		log.Error("Error while reading cookie!")
-		return
-	}
-
-	userId := userIdCookie.Value
-
-	if userId == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		log.Error("Invalid user!")
-		return
-	}
+	claims, _ := jwtToken.Claims.(jwt.MapClaims)
+	userId := claims["user_id"].(string)
 
 	dbUser, err := userModel.GetById(userId)
 	if err != nil {
@@ -172,22 +140,13 @@ func Refresh(userModel models.UserModel, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	models.RevokeRefreshToken(refreshToken)
 	tokenString, refreshToken, err := CreateJWTToken(dbUser)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	timeTTL := time.Minute * 5
-	timeDuration := time.Now().Add(timeTTL)
-	cookie := http.Cookie{
-		Name:     "access_token",
-		Value:    tokenString,
-		HttpOnly: true,
-		Expires:  timeDuration,
-	}
-
-	http.SetCookie(w, &cookie)
 	newRefreshTokenCookie := http.Cookie{
 		Name:     "refresh_token",
 		Value:    refreshToken,

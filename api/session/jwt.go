@@ -17,7 +17,8 @@ func CreateJWTToken(user types.User) (string, string, error) {
 		return "", "", err
 	}
 
-	refreshToken, err := models.NewRefreshToken(timeTTL)
+	timeTTL = time.Hour * 24 * 7
+	refreshToken, err := models.NewRefreshToken(user, timeTTL)
 	if err != nil {
 		return "", "", err
 	}

@@ -1,7 +1,8 @@
 # Authentication Service
 
-
 ## Generate Certificates (Public and Private RSA keys)
+
+Certificates for access tokens (JWT tokens used for API calls):
 
 ```
 openssl genrsa \
@@ -13,6 +14,20 @@ openssl rsa \
     -passin pass:12345678 \
     -in cert/private_key.pem \
     -pubout > cert/public_key.pub
+```
+
+For the refresh tokens (JWT tokens used to issue new access tokens):
+
+```
+openssl genrsa \
+    -passout pass:12345678 \
+    -out cert/refresh_private_key.pem \
+    2048
+    
+openssl rsa \
+    -passin pass:12345678 \
+    -in cert/refresh_private_key.pem \
+    -pubout > cert/refresh_public_key.pub
 ```
 
 ## Using JWK
