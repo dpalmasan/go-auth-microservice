@@ -58,6 +58,14 @@ spec:
               mountPath: /app/cert/public_key.pub
               subPath: public_key.pub
               readOnly: true
+            - name: refresh-private-key
+              mountPath: /app/cert/refresh_private_key.pem
+              subPath: refresh_private_key.pem
+              readOnly: true
+            - name: refresh-public-key
+              mountPath: /app/cert/refresh_public_key.pub
+              subPath: refresh_public_key.pub
+              readOnly: true
       volumes:
         - name: private-key
           secret:
@@ -66,6 +74,14 @@ spec:
         - name: public-key
           secret:
             secretName: auth-svc-public-key
+            defaultMode: 0400
+        - name: refresh-private-key
+          secret:
+            secretName: auth-svc-refresh-private-key
+            defaultMode: 0400
+        - name: refresh-public-key
+          secret:
+            secretName: auth-svc-refresh-public-key
             defaultMode: 0400
           # configMap:
           #  name: {{ template "authService.fullname" . }}
