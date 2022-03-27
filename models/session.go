@@ -111,3 +111,7 @@ func CheckRefreshToken(token string) (bool, error) {
 
 	return true, nil
 }
+
+func RevokeRefreshToken(token string) {
+	redis.Redis.Del(token)
+}
