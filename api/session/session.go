@@ -112,7 +112,7 @@ func Refresh(userModel models.UserModel, w http.ResponseWriter, r *http.Request)
 
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		log.Error("Not authorized")
+		log.Error("No refresh token was passed.")
 		return
 	}
 
@@ -120,7 +120,7 @@ func Refresh(userModel models.UserModel, w http.ResponseWriter, r *http.Request)
 
 	if refreshToken == "" {
 		w.WriteHeader(http.StatusUnauthorized)
-		log.Error("Not authorized")
+		log.Error("Refresh token is empty.")
 		return
 	}
 
